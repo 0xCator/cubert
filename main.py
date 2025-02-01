@@ -3,6 +3,7 @@ import torch
 import numpy as np
 from tqdm import tqdm
 import tensorflow as tf
+import pickle
 
 model_path = "claudios/cubert-20210711-Java-1024"
 model = TFAutoModel.from_pretrained(model_path)
@@ -27,14 +28,14 @@ split_lines = [line.split('\n') for line in train_df['code']]
 
 train_df_new = pd.DataFrame(columns = ['embedding', 'godclass'])
 
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+from keras.preprocessing.sequence import pad_sequences
 
 batch_size = 16 
 
 batch_lines = []
 batch_samples = []
 for i, sample in enumerate(split_lines):
-    print(f"Processing sample {i}")
+    print(f'{i}/{len(split_lines)}')
     sample_final = np.zeros(1024)
     
     for line in sample:
@@ -55,8 +56,7 @@ for i, sample in enumerate(split_lines):
             
             batch_lines = [] 
 
-    embedding_str = np.array2string(sample_final, separator=',', formatter={'all': lambda x: f'{x:.6f}'})[1:-1]
-    godclass = train_df['godclass'][i]
-    with open("train_embeddings.csv", "a") as f:
-        f.write(f"{embedding_str},{godclass}\n")
+    train_df_new = train_df_new._append({'embedding': sample_final, 'godclass': train_df['godclass'][i]}, ignore_index=True)
 
+
+train_df_new.to_pickle("./training_God_of🥒.pkl")
