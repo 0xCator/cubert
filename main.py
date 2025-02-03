@@ -13,8 +13,7 @@ model = TFAutoModel.from_pretrained(model_path)
 
 import pandas as pd
 
-train_df = pd.read_csv("train_beautified.csv")
-test_df = pd.read_csv("test_beautified.csv")
+train_df = pd.read_csv("train_beautified1.csv")
 
 
 from cubert.full_cubert_tokenizer import FullCuBertTokenizer
@@ -25,23 +24,12 @@ physical_devices = tf.config.list_physical_devices('GPU')
 
 split_lines = [line.split('\n') for line in train_df['code']]
 
-# Split `split_lines` into 4 equal parts
-num_parts = 4
-chunk_size = len(split_lines) // num_parts
-
-split_chunks = [split_lines[i * chunk_size: (i + 1) * chunk_size] for i in range(num_parts)]
-
-# Ensure the last chunk gets any remaining items (in case len(split_lines) isn't divisible by 4)
-if len(split_lines) % num_parts:
-    split_chunks[-1].extend(split_lines[num_parts * chunk_size:])
 
 train_df_new = pd.DataFrame(columns = ['embedding', 'godclass', 'longmethod'])
 
 batch_size = 16
 mutex = threading.Lock()  # Create a mutex lock
 train_df_new = []  # Shared list for thread-safe appending
-
-split_lines = split_chunks[0]
 
 def process_batch(batch_lines):
     """Pad batch, run through model, and return summed embeddings."""
@@ -74,8 +62,8 @@ def process_sample(i, sample):
 
     result = {
         'embedding': sample_final, 
-        'godclass': test_df['godclass'][i], 
-        'longmethod': test_df['longmethod'][i]
+        'godclass': train_df['godclass'][i], 
+        'longmethod': train_df['longmethod'][i]
     }
 
     # Lock while modifying shared data
