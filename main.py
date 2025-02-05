@@ -13,7 +13,18 @@ model = TFAutoModel.from_pretrained(model_path)
 
 import pandas as pd
 
-train_df = pd.read_csv("train_beautified1.csv")
+#parts not working: beautified2-part1, b3-p3-p2-p1, b5-p
+
+train_df = pd.read_csv("train_beautified5.csv")
+part_1 = train_df[:int(len(train_df)/4)]
+part_2 = train_df[int(len(train_df)/4):int(len(train_df)/2)]
+part_3 = train_df[int(len(train_df)/2):int(3*len(train_df)/4)]
+part_4 = train_df[int(3*len(train_df)/4):]
+part_1.index = range(len(part_1))
+part_2.index = range(len(part_2))
+part_3.index = range(len(part_3))
+part_4.index = range(len(part_4))
+train_df = part_2
 
 
 from cubert.full_cubert_tokenizer import FullCuBertTokenizer
@@ -77,4 +88,4 @@ with ThreadPoolExecutor() as executor:
 # Convert results to DataFrame
 train_df_new = pd.DataFrame(train_df_new)
 
-train_df_new.to_pickle("./train1.pkl")
+train_df_new.to_pickle("./train5-1.pkl")
